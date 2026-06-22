@@ -19,6 +19,19 @@ const AI_PROVIDER_OPTIONS = [
 
 type AiProvider = (typeof AI_PROVIDER_OPTIONS)[number]["value"];
 
+const LANGUAGE_OPTIONS = [
+  {
+    label: "Polski",
+    value: "pl",
+  },
+  {
+    label: "English",
+    value: "en",
+  },
+] as const;
+
+type AppLanguage = (typeof LANGUAGE_OPTIONS)[number]["value"];
+
 function getEventIcon(type: RoundEvent["type"]) {
   switch (type) {
     case "start":
@@ -99,6 +112,7 @@ export default function Home() {
 
   const [mortalityRate, setMortalityRate] = useState(25);
   const [aiProvider, setAiProvider] = useState<AiProvider>("xai");
+  const [language, setLanguage] = useState<AppLanguage>("pl");
   const [game, setGame] = useState<GameState | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeRoundNumber, setActiveRoundNumber] = useState<number | null>(null);
@@ -176,6 +190,7 @@ async function generateTraits() {
       },
       body: JSON.stringify({
         provider: aiProvider,
+        language,
         participants: validParticipants.map((participant, index) => ({
           index,
           name: participant.name,
@@ -245,6 +260,7 @@ async function generateTraits() {
         body: JSON.stringify({
           game,
           provider: aiProvider,
+          language,
         }),
       });
 
@@ -373,6 +389,29 @@ async function generateTraits() {
 
               <p className="field-help">{selectedProvider?.description}</p>
             </div>
+
+            <div className="model-picker">
+  <label className="field-label" htmlFor="language">
+    Język wydarzeń
+  </label>
+
+  <select
+    id="language"
+    value={language}
+    onChange={(e) => setLanguage(e.target.value as AppLanguage)}
+    className="sex-select"
+  >
+    {LANGUAGE_OPTIONS.map((option) => (
+      <option key={option.value} value={option.value}>
+        {option.label}
+      </option>
+    ))}
+  </select>
+
+  <p className="field-help">
+    Ten język będzie używany przez AI do rund, wydarzeń i dzienników.
+  </p>
+</div>
 
             <div className="slider-row">
               <div>
