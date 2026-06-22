@@ -481,6 +481,13 @@ async function generateTraits() {
                   {player.status === "dead" && player.deathCause && (
                     <p className="death-cause">{player.deathCause}</p>
                   )}
+{player.journalMd && (
+  <details className="journal-box">
+    <summary>Dziennik</summary>
+    <pre>{player.journalMd}</pre>
+  </details>
+)}
+                  
                 </article>
               ))}
             </div>

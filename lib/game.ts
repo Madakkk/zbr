@@ -42,7 +42,17 @@ export function applyRound(game: GameState, aiRound: AiRoundResult): GameState {
       }
     }
   }
+for (const update of aiRound.journalUpdates ?? []) {
+  players = players.map((player) => {
+    if (player.id !== update.playerId) return player;
+    if (player.status === "dead") return player;
 
+    return {
+      ...player,
+      journalMd: `${player.journalMd}\n${update.markdownEntry.trim()}\n`,
+    };
+  });
+}
   const alive = players.filter((player) => player.status === "alive");
 
   return {
@@ -73,6 +83,7 @@ export function createInitialGame(
   name: participant.name,
   sex: participant.sex,
   traits: parseTraits(participant.traitsText),
+  journalMd: `# Dziennik: ${participant.name}\n\n`,
   status: "alive",
   inventory: [],
   kills: 0,

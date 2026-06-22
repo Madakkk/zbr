@@ -12,10 +12,16 @@ export type Player = {
   name: string;
   sex: PlayerSex;
   traits: string[];
+  journalMd: string;
   status: PlayerStatus;
   inventory: string[];
   kills: number;
   deathCause?: string;
+};
+
+export type JournalUpdate = {
+  playerId: string;
+  markdownEntry: string;
 };
 
 export type GameState = {
@@ -58,10 +64,12 @@ export type RoundEvent = GeneratedRoundEvent & {
 
 export type AiGeneratedRoundResult = {
   events: GeneratedRoundEvent[];
+  journalUpdates: JournalUpdate[];
   roundSummary: string;
 };
 
 export type AiRoundResult = {
   events: RoundEvent[];
+  journalUpdates: JournalUpdate[];
   roundSummary: string;
 };

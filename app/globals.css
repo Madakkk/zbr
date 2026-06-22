@@ -663,3 +663,27 @@ h2 {
     grid-template-columns: 1fr;
   }
 }
+
+.journal-box {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(0, 0, 0, 0.18);
+  overflow: hidden;
+}
+
+.journal-box summary {
+  padding: 10px 12px;
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.journal-box pre {
+  margin: 0;
+  padding: 12px;
+  white-space: pre-wrap;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.45;
+}

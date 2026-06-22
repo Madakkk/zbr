@@ -98,11 +98,23 @@ const roundSchema = {
         required: ["type", "participants", "text", "stateChanges"],
       },
     },
+    journalUpdates: {
+  type: "array",
+  items: {
+    type: "object",
+    additionalProperties: false,
+    properties: {
+      playerId: { type: "string" },
+      markdownEntry: { type: "string" },
+    },
+    required: ["playerId", "markdownEntry"],
+  },
+},
     roundSummary: {
       type: "string",
     },
   },
-  required: ["events", "roundSummary"],
+required: ["events", "journalUpdates", "roundSummary"],
 } as const;
 
 function getDeathBudget(game: GameState, aliveCount: number) {
@@ -187,6 +199,10 @@ function sanitizeRound(
   };
 }
 
+function getRecentJournal(journalMd: string) {
+  return journalMd.slice(-1200);
+}
+
 function addRoundMetadata(
   aiRound: AiGeneratedRoundResult,
   roundNumber: number
@@ -200,6 +216,27 @@ function addRoundMetadata(
       roundNumber,
       timestamp: new Date(baseTime + index * 1000).toISOString(),
     })),
+  };
+}
+
+function sanitizeJournalUpdates(
+  aiRound: AiGeneratedRoundResult,
+  game: GameState
+): AiGeneratedRoundResult {
+  const aliveIds = new Set(
+    game.players
+      .filter((player) => player.status === "alive")
+      .map((player) => player.id)
+  );
+
+  return {
+    ...aiRound,
+    journalUpdates: (aiRound.journalUpdates ?? [])
+      .filter((update) => aliveIds.has(update.playerId))
+      .map((update) => ({
+        playerId: update.playerId,
+        markdownEntry: update.markdownEntry.slice(0, 800),
+      })),
   };
 }
 
@@ -268,7 +305,17 @@ Zasady gry:
 - Relacje między postaciami mogą być tylko homoerotyczne.
 - Sceny seksu mają być sugestywne, a nie opisanie dokładnie. 
 
-
+Dzienniki:
+- Każdy żywy gracz ma recentJournal, czyli ostatnie wpisy z własnego dziennika.
+- Używaj dzienników do budowania ciągłości, obsesji, urazów, sojuszy, paranoi i złych decyzji.
+- Jeśli gracz wcześniej coś zapisał, może do tego wracać w kolejnych rundach.
+- Po każdej rundzie zwróć journalUpdates dla żywych graczy.
+- journalUpdates ma zawierać krótkie wpisy Markdown z perspektywy graczy.
+- Każdy markdownEntry ma mieć nagłówek z numerem rundy, np. "## Runda 2".
+- Wpis powinien pokazywać myśli, emocje, błędne wnioski albo plan gracza.
+- Wpisy mogą być śmieszne, dziwne i subiektywne, ale nie mogą zmieniać faktów z rundy.
+- Nie dopisuj dziennika martwym graczom.
+- Nie zmieniaj wcześniejszych wpisów.
 
 Zasady śmierci:
 
@@ -290,7 +337,15 @@ Zasady śmierci:
               : "To jest zwykła runda. Mogą pojawić się akcje solo, interakcje, walki, wypadki i wydarzenia losowe.",
             mortalityRate: game.mortalityRate,
             lethalDeathBudget: deathBudget,
-            alivePlayers,
+alivePlayers: alivePlayers.map((player) => ({
+  id: player.id,
+  name: player.name,
+  sex: player.sex,
+  traits: player.traits,
+  inventory: player.inventory,
+  kills: player.kills,
+  recentJournal: getRecentJournal(player.journalMd),
+})),
             recentEvents: game.log.slice(-10),
             requiredToneExamples: [
 
@@ -314,10 +369,11 @@ Zasady śmierci:
       throw new Error("Model returned an empty response.");
     }
 
-    const aiRound = JSON.parse(raw) as AiGeneratedRoundResult;
-    const sanitizedRound = sanitizeRound(aiRound, game, deathBudget);
-    const roundWithMetadata = addRoundMetadata(sanitizedRound, game.roundNumber);
-    const updatedGame = applyRound(game, roundWithMetadata);
+const aiRound = JSON.parse(raw) as AiGeneratedRoundResult;
+const sanitizedRound = sanitizeRound(aiRound, game, deathBudget);
+const sanitizedWithJournals = sanitizeJournalUpdates(sanitizedRound, game);
+const roundWithMetadata = addRoundMetadata(sanitizedWithJournals, game.roundNumber);
+const updatedGame = applyRound(game, roundWithMetadata);
 
     return NextResponse.json({
       game: updatedGame,
