@@ -81,14 +81,14 @@ function formatEventTime(timestamp: string) {
 }
 
 export default function Home() {
-  const [participants, setParticipants] = useState<ParticipantInput[]>([
-    { name: "Grzegorz", sex: "male" },
-    { name: "Marta", sex: "female" },
-    { name: "Pan Wiadro", sex: "male" },
-    { name: "Sandra", sex: "female" },
-    { name: "Sebix z Rady Osiedla", sex: "male" },
-    { name: "Kasia od Excela", sex: "female" },
-  ]);
+ const [participants, setParticipants] = useState<ParticipantInput[]>([
+  { name: "Grzegorz", sex: "male", traits: [] },
+  { name: "Marta", sex: "female", traits: [] },
+  { name: "Pan Wiadro", sex: "male", traits: [] },
+  { name: "Sandra", sex: "female", traits: [] },
+  { name: "Sebix z Rady Osiedla", sex: "male", traits: [] },
+  { name: "Kasia od Excela", sex: "female", traits: [] },
+]);
 
   const [mortalityRate, setMortalityRate] = useState(25);
   const [aiProvider, setAiProvider] = useState<AiProvider>("xai");
