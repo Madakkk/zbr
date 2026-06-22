@@ -4,7 +4,7 @@ export type PlayerSex = "male" | "female" | "other";
 export type ParticipantInput = {
   name: string;
   sex: PlayerSex;
-  traits: string[];
+  traitsText: string;
 };
 
 export type Player = {
