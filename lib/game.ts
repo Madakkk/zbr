@@ -62,13 +62,14 @@ export function createInitialGame(
     roundNumber: 1,
     mortalityRate,
     players: participants.map((participant, index) => ({
-      id: `p${index + 1}`,
-      name: participant.name,
-      sex: participant.sex,
-      status: "alive",
-      inventory: [],
-      kills: 0,
-    })),
+  id: `p${index + 1}`,
+  name: participant.name,
+  sex: participant.sex,
+  traits: participant.traits,
+  status: "alive",
+  inventory: [],
+  kills: 0,
+})),
     log: [],
   };
 }
