@@ -4,12 +4,14 @@ export type PlayerSex = "male" | "female" | "other";
 export type ParticipantInput = {
   name: string;
   sex: PlayerSex;
+  traits: string[];
 };
 
 export type Player = {
   id: string;
   name: string;
   sex: PlayerSex;
+  traits: string[];
   status: PlayerStatus;
   inventory: string[];
   kills: number;
