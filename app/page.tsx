@@ -346,6 +346,14 @@ async function generateTraits() {
             <button className="ghost-button full-width" onClick={addParticipant} type="button">
               Dodaj uczestnika
             </button>
+            <button
+  className="ghost-button full-width"
+  onClick={generateTraits}
+  type="button"
+  disabled={loading}
+>
+  {loading ? "Generuję cechy..." : "Wygeneruj brakujące cechy AI"}
+</button>
 
             <div className="model-picker">
               <label className="field-label" htmlFor="ai-provider">
@@ -408,7 +416,10 @@ async function generateTraits() {
                   <span>{index + 1}</span>
                   <div>
                     <strong>{participant.name}</strong>
-                    <small>{getSexLabel(participant.sex)}</small>
+                    <small>{getSexLabel(participant.sex)}</small>{participant.traits.length > 0 && (
+  <small>{participant.traits.join(", ")}</small>
+)}
+                    
                   </div>
                 </div>
               ))}
