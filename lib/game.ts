@@ -53,6 +53,13 @@ export function applyRound(game: GameState, aiRound: AiRoundResult): GameState {
     winnerId: alive.length === 1 ? alive[0].id : undefined,
   };
 }
+function parseTraits(value: string) {
+  return value
+    .split(",")
+    .map((trait) => trait.trim())
+    .filter(Boolean)
+    .slice(0, 5);
+}
 
 export function createInitialGame(
   participants: ParticipantInput[],
@@ -65,7 +72,7 @@ export function createInitialGame(
   id: `p${index + 1}`,
   name: participant.name,
   sex: participant.sex,
-  traits: participant.traits,
+  traits: parseTraits(participant.traitsText),
   status: "alive",
   inventory: [],
   kills: 0,
