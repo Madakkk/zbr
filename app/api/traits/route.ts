@@ -2,9 +2,15 @@ import OpenAI from "openai";
 import { NextResponse } from "next/server";
 
 type AiProvider = "openai" | "xai";
+type AppLanguage = "pl" | "en";
+
 
 function getProvider(value: unknown): AiProvider {
   return value === "openai" || value === "xai" ? value : "xai";
+}
+
+function getLanguage(value: unknown): AppLanguage {
+  return value === "en" ? "en" : "pl";
 }
 
 function getClient(provider: AiProvider) {
@@ -63,38 +69,56 @@ export async function POST(req: Request) {
     const body = await req.json();
 
     const provider = getProvider(body.provider);
+    const language = getLanguage(body.language);
     const client = getClient(provider);
     const model = getModel(provider);
 
     const participants = Array.isArray(body.participants) ? body.participants : [];
 
     const completion = await client.chat.completions.create({
+      const languageInstruction =
+  language === "pl"
+    ? `
+- Pisz po polsku.
+- Cechy mają mieć polski, memiczny, lekko absurdalny klimat.
+`
+    : `
+- Write in English.
+- Traits should have an absurd, meme-like, slightly Polish internet flavor.
+- Polish references are okay, but they should be understandable from context.
+`;
       model,
       temperature: 0.9,
       messages: [
         {
           role: "system",
           content: `
-Wygeneruj cechy postaci do polskiego, absurdalnego battle royale.
+Generate character traits for an absurd battle royale simulator.
 
-Zasady:
-- Pisz po polsku.
-- Każda postać ma dostać 3 krótkie cechy.
-- Cechy mają być użyteczne narracyjnie.
-- Cechy mają pasować do imienia/nazwy i płci, ale bez stereotypów.
-- Humor może być polski, memiczny i lekko gen Z.
-- Nie dawaj cech obraźliwych wobec realnych grup ludzi.
-- Nie dawaj cech zbyt długich.
-- Zwróć tylko JSON zgodny ze schematem.
+Rules:
+${languageInstruction}
+- Each character should receive 3 short traits.
+- Traits should be useful for narration.
+- Traits should match the name and sex, but avoid lazy stereotypes.
+- Do not create traits that attack real protected groups.
+- Keep traits short.
+- Return only JSON matching the schema.
 
-Przykłady dobrych cech:
+Good trait examples in Polish:
 - panikuje przy Excelu
 - ma energię rzecznika prasowego
 - nosi paragon jak talizman
 - wierzy w siłę kolejki
 - umie kłócić się o nic
 - ma podejrzany spokój
-          `.trim(),
+
+Good trait examples in English:
+- panics near spreadsheets
+- has press spokesperson energy
+- treats receipts like sacred documents
+- can argue about nothing
+- suspiciously calm under pressure
+`.trim(),
         },
         {
           role: "user",
