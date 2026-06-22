@@ -147,14 +147,74 @@ export default function Home() {
   }
 
   function addParticipant() {
-    setParticipants((current) => [...current, { name: "", sex: "other" }]);
-  }
+  setParticipants((current) => [...current, { name: "", sex: "other", traits: [] }]);
+}
 
   function removeParticipant(index: number) {
     setParticipants((current) =>
       current.filter((_, participantIndex) => participantIndex !== index)
     );
   }
+
+  function updateParticipantTraits(index: number, value: string) {
+  const traits = value
+    .split(",")
+    .map((trait) => trait.trim())
+    .filter(Boolean);
+
+  updateParticipant(index, { traits });
+}
+
+async function generateTraits() {
+  if (validParticipants.length < 2) return;
+
+  setLoading(true);
+
+  try {
+    const res = await fetch("/api/traits", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        provider: aiProvider,
+        participants: validParticipants.map((participant, index) => ({
+          index,
+          name: participant.name,
+          sex: participant.sex,
+        })),
+      }),
+    });
+
+    const data = await res.json();
+
+    if (data.participants) {
+      setParticipants((current) =>
+        current.map((participant, index) => {
+          if (participant.traits.length > 0) return participant;
+
+          const generated = data.participants.find(
+            (item: { index: number; traits: string[] }) => item.index === index
+          );
+
+          if (!generated) return participant;
+
+          return {
+            ...participant,
+            traits: generated.traits,
+          };
+        })
+      );
+    } else if (data.error) {
+      alert(data.error);
+    }
+  } catch (error) {
+    console.error(error);
+    alert("Nie udało się wygenerować cech.");
+  } finally {
+    setLoading(false);
+  }
+}
 
   function startGame() {
     if (validParticipants.length < 2) return;
