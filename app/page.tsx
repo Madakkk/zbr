@@ -80,14 +80,21 @@ function formatEventTime(timestamp: string) {
   }).format(new Date(timestamp));
 }
 
+function parseTraitsText(value: string) {
+  return value
+    .split(",")
+    .map((trait) => trait.trim())
+    .filter(Boolean);
+}
+
 export default function Home() {
- const [participants, setParticipants] = useState<ParticipantInput[]>([
-  { name: "Grzegorz", sex: "male", traits: [] },
-  { name: "Marta", sex: "female", traits: [] },
-  { name: "Pan Wiadro", sex: "male", traits: [] },
-  { name: "Sandra", sex: "female", traits: [] },
-  { name: "Sebix z Rady Osiedla", sex: "male", traits: [] },
-  { name: "Kasia od Excela", sex: "female", traits: [] },
+  const [participants, setParticipants] = useState<ParticipantInput[]>([
+  { name: "Gracz 1", sex: "male", traitsText: "" },
+  { name: "Gracz 2", sex: "female", traitsText: "" },
+  { name: "Gracz 3", sex: "male", traitsText: "" },
+  { name: "Gracz 4", sex: "female", traitsText: "" },
+  { name: "Gracz 5", sex: "male", traitsText: "" },
+  { name: "Gracz 6", sex: "female", traitsText: "" },
 ]);
 
   const [mortalityRate, setMortalityRate] = useState(25);
@@ -147,7 +154,7 @@ export default function Home() {
   }
 
   function addParticipant() {
-  setParticipants((current) => [...current, { name: "", sex: "other", traits: [] }]);
+  setParticipants((current) => [...current, { name: "", sex: "other", traitsText: "" }]);
 }
 
   function removeParticipant(index: number) {
@@ -155,15 +162,6 @@ export default function Home() {
       current.filter((_, participantIndex) => participantIndex !== index)
     );
   }
-
-  function updateParticipantTraits(index: number, value: string) {
-  const traits = value
-    .split(",")
-    .map((trait) => trait.trim())
-    .filter(Boolean);
-
-  updateParticipant(index, { traits });
-}
 
 async function generateTraits() {
   if (validParticipants.length < 2) return;
@@ -191,7 +189,7 @@ async function generateTraits() {
     if (data.participants) {
       setParticipants((current) =>
         current.map((participant, index) => {
-          if (participant.traits.length > 0) return participant;
+          if (participant.traitsText.trim().length > 0) return participant;
 
           const generated = data.participants.find(
             (item: { index: number; traits: string[] }) => item.index === index
@@ -201,7 +199,7 @@ async function generateTraits() {
 
           return {
             ...participant,
-            traits: generated.traits,
+            traitsText: generated.traits.join(", "),
           };
         })
       );
@@ -325,8 +323,8 @@ async function generateTraits() {
 </select>
 
 <input
-  value={participant.traits.join(", ")}
-  onChange={(e) => updateParticipantTraits(index, e.target.value)}
+  value={participant.traitsText}
+  onChange={(e) => updateParticipant(index, { traitsText: e.target.value })}
   className="traits-input"
   placeholder="Cechy, po przecinku"
 />
@@ -416,8 +414,10 @@ async function generateTraits() {
                   <span>{index + 1}</span>
                   <div>
                     <strong>{participant.name}</strong>
-                    <small>{getSexLabel(participant.sex)}</small>{participant.traits.length > 0 && (
-  <small>{participant.traits.join(", ")}</small>
+                    <small>{getSexLabel(participant.sex)}</small>
+                    {parseTraitsText(participant.traitsText).length > 0 && (
+  <small>{parseTraitsText(participant.traitsText).join(", ")}</small>
+)}
 )}
                     
                   </div>
