@@ -418,7 +418,6 @@ async function generateTraits() {
                     {parseTraitsText(participant.traitsText).length > 0 && (
   <small>{parseTraitsText(participant.traitsText).join(", ")}</small>
 )}
-)}
                     
                   </div>
                 </div>
