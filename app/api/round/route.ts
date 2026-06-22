@@ -265,6 +265,8 @@ Zasady gry:
 - Cechy postaci mają wpływać na zachowanie, decyzje, sojusze, porażki i sukcesy.
 - Nie ignoruj cech, jeśli są podane.
 - Nie zmieniaj cech gracza w trakcie gry.
+- Relacje między postaciami mogą być tylko homoerotyczne.
+- Sceny seksu mają być sugestywne, a nie opisanie dokładnie. 
 
 
 
