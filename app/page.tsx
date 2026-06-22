@@ -306,32 +306,39 @@ async function generateTraits() {
               {participants.map((participant, index) => (
                 <div className="participant-row" key={index}>
                   <input
-                    value={participant.name}
-                    onChange={(e) => updateParticipant(index, { name: e.target.value })}
-                    className="name-input"
-                    placeholder="Imię albo nazwa uczestnika"
-                  />
+  value={participant.name}
+  onChange={(e) => updateParticipant(index, { name: e.target.value })}
+  className="name-input"
+  placeholder="Imię albo nazwa uczestnika"
+/>
 
-                  <select
-                    value={participant.sex}
-                    onChange={(e) =>
-                      updateParticipant(index, { sex: e.target.value as PlayerSex })
-                    }
-                    className="sex-select"
-                  >
-                    <option value="male">mężczyzna</option>
-                    <option value="female">kobieta</option>
-                    <option value="other">inna</option>
-                  </select>
+<select
+  value={participant.sex}
+  onChange={(e) =>
+    updateParticipant(index, { sex: e.target.value as PlayerSex })
+  }
+  className="sex-select"
+>
+  <option value="male">mężczyzna</option>
+  <option value="female">kobieta</option>
+  <option value="other">inna</option>
+</select>
 
-                  <button
-                    className="remove-button"
-                    onClick={() => removeParticipant(index)}
-                    disabled={participants.length <= 2}
-                    type="button"
-                  >
-                    Usuń
-                  </button>
+<input
+  value={participant.traits.join(", ")}
+  onChange={(e) => updateParticipantTraits(index, e.target.value)}
+  className="traits-input"
+  placeholder="Cechy, po przecinku"
+/>
+
+<button
+  className="remove-button"
+  onClick={() => removeParticipant(index)}
+  disabled={participants.length <= 2}
+  type="button"
+>
+  Usuń
+</button>
                 </div>
               ))}
             </div>
