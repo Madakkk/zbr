@@ -10,9 +10,14 @@ import {
 } from "@/lib/types";
 
 type AiProvider = "openai" | "xai";
+type AppLanguage = "pl" | "en";
 
 function getProvider(value: unknown): AiProvider {
   return value === "openai" || value === "xai" ? value : "xai";
+}
+
+function getLanguage(value: unknown): AppLanguage {
+  return value === "en" ? "en" : "pl";
 }
 
 function getClient(provider: AiProvider) {
@@ -246,6 +251,7 @@ export async function POST(req: Request) {
     const provider = getProvider(body.provider);
 const client = getClient(provider);
 const model = getModel(provider);
+    const language = getLanguage(body.language);
     const game = body.game as GameState;
 
     const alivePlayers = game.players.filter((player) => player.status === "alive");
@@ -256,16 +262,35 @@ const model = getModel(provider);
 
     const deathBudget = getDeathBudget(game, alivePlayers.length);
     const isStartingRound = game.roundNumber === 1;
-
+const languageInstruction =
+  language === "pl"
+    ? `
+Język:
+- Wszystko pisz po polsku.
+- Humor ma być absurdalny, memiczny, lekko gen Z i chaotyczny.
+- Klimat: polski internet, Żabka, paczkomaty, osiedlowy monitoring, grzybobranie, komentarze na Facebooku, rodzinny grill, kolejka do lekarza, Sejm, komisje, paski informacyjne, polityczne przepychanki.
+- Możesz robić lekkie żarty z polskiej polityki i życia publicznego, ale bez agitacji wyborczej.
+`
+    : `
+Language:
+- Write everything in English.
+- Keep the humor absurd, meme-like, slightly Gen Z, chaotic, and wrong in a funny way.
+- You may use Polish cultural references, but make them understandable from context.
+- The vibe should feel like a Polish internet disaster translated for English readers.
+- You may lightly joke about Polish public life, but do not create political persuasion.
+`;
     const completion = await client.chat.completions.create({
       model,
       temperature: 0.95,
       messages: [
         {
-          role: "system",
-          content: `
-You are the narrative engine for a Polish battle royale simulator.
-Return only valid JSON matching the provided schema.
+  role: "system",
+  content: `
+You are the narrative engine for a battle royale simulator.
+
+Return only valid JSON matching the schema.
+
+${languageInstruction}
 
 Identity:
 
@@ -353,11 +378,17 @@ Death rules:
         {
           role: "user",
           content: JSON.stringify({
+              language,
             roundNumber: game.roundNumber,
             isStartingRound,
-            instructionsForThisRound: isStartingRound
-              ? "To jest runda startowa. Nikt nie może zginąć. Gracze mają zbierać materiały, znajdować przedmioty, chować się, zawierać sojusze i ustawiać klimat gry. Wszystko zaczyna się na polu bitwy na zadupiu gdzieś w polsce B."
-              : "To jest zwykła runda. Mogą pojawić się akcje solo, interakcje, walki, wypadki i wydarzenia losowe.",
+            instructionsForThisRound:
+  language === "pl"
+    ? isStartingRound
+      ? "To jest runda startowa. Nikt nie może zginąć. Gracze zbierają materiały, znajdują absurdalne przedmioty, chowają się, zawierają sojusze i ustawiają relacje."
+      : "To jest zwykła runda. Mogą pojawić się akcje solo, interakcje, walki, wypadki i wydarzenia losowe."
+    : isStartingRound
+      ? "This is the starting round. Nobody can die. Players gather materials, find absurd items, hide, form alliances, and establish relationships."
+      : "This is a regular round. Include solo actions, interactions, fights, accidents, and random events.",
             mortalityRate: game.mortalityRate,
             lethalDeathBudget: deathBudget,
 alivePlayers: alivePlayers.map((player) => ({
