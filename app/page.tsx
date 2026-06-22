@@ -466,9 +466,14 @@ async function generateTraits() {
                   </div>
 
                   <div className="player-meta">
+                    {player.traits.length > 0 && (
+  <p className="traits-list">{player.traits.join(", ")}</p>
+)}
                     <span>{getSexLabel(player.sex)}</span>
                     <span>Eliminacje: {player.kills}</span>
                   </div>
+
+                  
 
                   <p className="inventory">
                     {player.inventory.length ? player.inventory.join(", ") : "Brak sprzętu."}
